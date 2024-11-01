@@ -1,0 +1,15 @@
+{
+    "name": "My Codespace",
+    "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
+    "postStartCommand": "python3 /workspaces/Ddos-By-Kaushik/kaushik.py",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.pythonPath": "/usr/bin/python3"
+            },
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    }
+}
