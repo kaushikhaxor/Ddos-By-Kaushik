@@ -1,7 +1,7 @@
 {
     "name": "My Codespace",
     "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
-    "postStartCommand": "python3 /workspaces/Ddos-By-Kaushik/danger.py",
+    "postStartCommand": "python3 /workspaces/Ddos-By-Kaushik/telegram_bot.py",
     "customizations": {
         "vscode": {
             "settings": {
