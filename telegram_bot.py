@@ -1,6 +1,6 @@
 import os
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # Function to convert TTF to .h
 def ttf_to_header(ttf_file_path, output_file_path):
@@ -28,11 +28,11 @@ def ttf_to_header(ttf_file_path, output_file_path):
         return False
 
 # Start command
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Hello! Send me a .ttf font file, and I'll convert it to a .h file for you.")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hello! Send me a .ttf font file, and I'll convert it to a .h file for you.")
 
 # File handler
-def handle_file(update: Update, context: CallbackContext):
+async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file = update.message.document
     if file.mime_type == "font/ttf":
         file_id = file.file_id
@@ -41,33 +41,31 @@ def handle_file(update: Update, context: CallbackContext):
         # Download the TTF file
         ttf_file_path = f"./{file_name}"
         output_file_path = f"./{os.path.splitext(file_name)[0]}.h"
-        file_obj = context.bot.get_file(file_id)
-        file_obj.download(ttf_file_path)
+        file_obj = await context.bot.get_file(file_id)
+        await file_obj.download_to_drive(ttf_file_path)
 
         # Convert to .h
         if ttf_to_header(ttf_file_path, output_file_path):
             with open(output_file_path, 'rb') as f:
-                update.message.reply_document(f, filename=os.path.basename(output_file_path))
+                await update.message.reply_document(f, filename=os.path.basename(output_file_path))
             os.remove(ttf_file_path)  # Cleanup
             os.remove(output_file_path)
         else:
-            update.message.reply_text("Failed to convert the font file. Please try again.")
+            await update.message.reply_text("Failed to convert the font file. Please try again.")
     else:
-        update.message.reply_text("Please send a valid .ttf file.")
+        await update.message.reply_text("Please send a valid .ttf file.")
 
 # Main function
 def main():
     # Replace 'YOUR_BOT_TOKEN' with your Telegram bot token
-    updater = Updater("YOUR_BOT_TOKEN")
-    dispatcher = updater.dispatcher
+    application = Application.builder().token("YOUR_BOT_TOKEN").build()
 
     # Add command and message handlers
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.document, handle_file))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.Document.ALL, handle_file))
 
     # Start the bot
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
